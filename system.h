@@ -50,7 +50,7 @@
 #include "p24F16KA301.h"
 //#endif
 
-#include "..\..\Microchip\Include\GenericTypeDefs.h"
+#include "GenericTypeDefs.h"
 
 /*
   Select between different operating modes based on the kit being used.
@@ -73,9 +73,10 @@
 //#endif
 
 #include "uart.h"
+#include "rtcc.h"
 //#include "buttons.h"
 //#include "ctmu.h"
-//#include "eeprom.h"
+#include "eeprom.h"
 //#include "sensors.h"
 //#include "transmit.h"
 

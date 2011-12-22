@@ -64,13 +64,13 @@
 #ifdef __PIC24F16KA301__
     // Setup configuration bits
     _FBS(BSS_OFF & BWRP_OFF)
-    _FGS(GCP_OFF & GWRP_OFF)
+    _FGS(GSS0_OFF & GWRP_OFF)
     _FOSCSEL(FNOSC_FRCDIV & IESO_OFF)
     _FOSC(FCKSM_CSECMD & POSCFREQ_MS & OSCIOFNC_ON & POSCMOD_NONE & SOSCSEL_SOSCLP)
     _FWDT(FWDTEN_OFF & WINDIS_OFF & FWPSA_PR128 & WDTPS_PS32768)
     _FPOR(MCLRE_ON & BORV_LPBOR & BOREN_BOR3 & I2C1SEL_PRI & PWRTEN_OFF)
-    _FICD(BKBUG_OFF & ICS_PGx3)
-    _FDS(DSWDTEN_OFF & DSBOREN_ON & RTCOSC_SOSC & DSWDTOSC_SOSC & DSWDTPS_DSWDTPSF) //DSWDT SOSC = LPRC
+    _FICD(ICS_PGx3)
+    _FDS(DSWDTEN_OFF & DSBOREN_ON & DSWDTOSC_SOSC & DSWDTPS_DSWDTPSF) //DSWDT SOSC = LPRC
 #elif defined __PIC24F16KA102__
     // Setup configuration bits
     _FBS(BSS_OFF & BWRP_OFF)
@@ -222,8 +222,6 @@ int main(void)
 	SetupGyro();
 	SetupMag();
     SetupAcc();
-		
-	int i;
 
 	BYTE dataVal[6];
     BYTE *pData;
@@ -239,166 +237,17 @@ int main(void)
 
 	while(1)
     {	
-		//Send a start bit
-	    I2C1CONbits.SEN = 1;
-	    I2CWait();     //wait for interrupt
-		
-	    for(i = 0; i<6;i++)
-	    {
-			//Transmit the I2C address byte
-		    I2C1TRN = MAG_ADDRESS | I2C_WRITE;
-		    I2CWait();     //wait for interrupt
-			I2C1TRN = i+3;
-		    I2CWait();     //wait for interrupt
-	        
-			//Send a restart bit
-	   		I2C1CONbits.RSEN = 1;
-	    	I2CWait();     //wait for interrupt
-		
-			I2C1TRN = MAG_ADDRESS | I2C_READ;
-		    I2CWait();     //wait for interrupt
-
-			//Receive a data byte
-	        I2C1CONbits.RCEN = 1;
-	        I2CWait();     //wait for interrupt
-	        //Read data
-	        pData[i] = I2C1RCV;
-	
-	        I2C1CONbits.RSEN = 1;
-	        I2CWait();     //wait for interrupt
-	    }
-		
-	    //Send the stop bit, ending this session
-	    I2C1CONbits.PEN = 1;
-	    I2CWait();     //wait for interrupt
-	
-		
+		ReadMag(pData);
 		//********************************************************************************************
 		//Gyroscope code
-	
-		/*
-	    //Send a start bit
-	    I2C1CONbits.SEN = 1;
-	    I2CWait();     //wait for interrupt
-	
-		//Transmit the I2C address byte
-	    I2C1TRN = GYRO_ADDRESS | I2C_WRITE;
-	    I2CWait();     //wait for interrupt
-	
-	    //Transmit data address
-	    I2C1TRN = (L3G4200_X_L | L3G4200_CONTINUOUS_READ);
-	    I2CWait();     //wait for interrupt
-	
-	    //Send a restart bit
-	    I2C1CONbits.RSEN = 1;
-	    I2CWait();     //wait for interrupt
-		*/	
-		
-		/*
-		//Transmit the I2C address byte
-		I2C1TRN = GYRO_ADDRESS | I2C_READ;
-		I2CWait();     //wait for interrupt		
-		*/
-	
-		//Send a start bit
-	    I2C1CONbits.SEN = 1;
-	    I2CWait();     //wait for interrupt
+		ReadGyro(pGyroData);
 
-	    //Read data packet
-	    for(i = 0; i<6;i++)
-	    {
-			//Transmit the I2C address byte
-		    I2C1TRN = GYRO_ADDRESS | I2C_WRITE;
-		    I2CWait();     //wait for interrupt
-			I2C1TRN = i+L3G4200_X_L;
-		    I2CWait();     //wait for interrupt
-	        
-			//Send a restart bit
-	   		I2C1CONbits.RSEN = 1;
-	    	I2CWait();     //wait for interrupt
-		
-			I2C1TRN = GYRO_ADDRESS | I2C_READ;
-		    I2CWait();     //wait for interrupt
-
-			//Receive a data byte
-	        I2C1CONbits.RCEN = 1;
-	        I2CWait();     //wait for interrupt
-	        //Read data
-	        pGyroData[i] = I2C1RCV;
-	
-	        I2C1CONbits.RSEN = 1;
-	        I2CWait();     //wait for interrupt
-
-			/*
-			//Receive a data byte
-	        I2C1CONbits.RCEN = 1;
-	        I2CWait();     //wait for interrupt
-
-	        //Read data
-	        pGyroData[i] = I2C1RCV;
-	
-	        //Transmit NACK on last byte, ACK on others
-	        if(i==6-1)
-	        {
-	            I2C1CONbits.ACKDT = 1;
-	        }
-	        else
-	        {
-	            I2C1CONbits.ACKDT = 0;
-	        }
-	
-	        I2C1CONbits.ACKEN = 1;
-	        I2CWait();     //wait for interrupt
-			*/
-			
-	    }
-	
-	    //Send the stop bit, ending this session
-	    I2C1CONbits.PEN = 1;
-	    I2CWait();     //wait for interrupt
-
-		
 		//*****************************************************
 		//Acc Code
-		
-		//Send a start bit
-	    I2C1CONbits.SEN = 1;
-	    I2CWait();     //wait for interrupt
-		
-	    for(i = 0; i<6;i++)
-	    {
-			//Transmit the I2C address byte
-		    I2C1TRN = ACC_ADDRESS | I2C_WRITE;
-		    I2CWait();     //wait for interrupt
-			I2C1TRN = i+1;
-		    I2CWait();     //wait for interrupt
-	        
-			//Send a restart bit
-	   		I2C1CONbits.RSEN = 1;
-	    	I2CWait();     //wait for interrupt
-		
-			I2C1TRN = ACC_ADDRESS | I2C_READ;
-		    I2CWait();     //wait for interrupt
-
-			//Receive a data byte
-	        I2C1CONbits.RCEN = 1;
-	        I2CWait();     //wait for interrupt
-	        //Read data
-	        pAccData[i] = I2C1RCV;
-	
-	        I2C1CONbits.RSEN = 1;
-	        I2CWait();     //wait for interrupt
-	    }
-		
-	    //Send the stop bit, ending this session
-	    I2C1CONbits.PEN = 1;
-	    I2CWait();     //wait for interrupt
-		
+		ReadAcc(pAccData);
 		
 		//***************************************************
 		//UART Code
-
-
 		_UxMD = 0;      //Enable UART
 	    UARTInit();
 	    
@@ -462,7 +311,120 @@ int main(void)
 		
         
     }//end while(1)
+	return 0;
 }//end main
+
+void ReadMag(BYTE *pData) {
+	int i;
+	//Send a start bit
+	I2C1CONbits.SEN = 1;
+	I2CWait();     //wait for interrupt
+
+	for(i = 0; i<6;i++)
+	{
+		//Transmit the I2C address byte
+		I2C1TRN = MAG_ADDRESS | I2C_WRITE;
+		I2CWait();     //wait for interrupt
+		I2C1TRN = i+3;
+		I2CWait();     //wait for interrupt
+
+		//Send a restart bit
+		I2C1CONbits.RSEN = 1;
+		I2CWait();     //wait for interrupt
+
+		I2C1TRN = MAG_ADDRESS | I2C_READ;
+		I2CWait();     //wait for interrupt
+
+		//Receive a data byte
+		I2C1CONbits.RCEN = 1;
+		I2CWait();     //wait for interrupt
+		//Read data
+		pData[i] = I2C1RCV;
+
+		I2C1CONbits.RSEN = 1;
+		I2CWait();     //wait for interrupt
+	}
+
+	//Send the stop bit, ending this session
+	I2C1CONbits.PEN = 1;
+	I2CWait();     //wait for interrupt
+
+}
+
+void ReadAcc(BYTE *pAccData) {
+	int i;
+	//Send a start bit
+	I2C1CONbits.SEN = 1;
+	I2CWait();     //wait for interrupt
+
+	for(i = 0; i<6;i++)
+	{
+		//Transmit the I2C address byte
+		I2C1TRN = ACC_ADDRESS | I2C_WRITE;
+		I2CWait();     //wait for interrupt
+		I2C1TRN = i+1;
+		I2CWait();     //wait for interrupt
+
+		//Send a restart bit
+		I2C1CONbits.RSEN = 1;
+		I2CWait();     //wait for interrupt
+
+		I2C1TRN = ACC_ADDRESS | I2C_READ;
+		I2CWait();     //wait for interrupt
+
+		//Receive a data byte
+		I2C1CONbits.RCEN = 1;
+		I2CWait();     //wait for interrupt
+		//Read data
+		pAccData[i] = I2C1RCV;
+
+		I2C1CONbits.RSEN = 1;
+		I2CWait();     //wait for interrupt
+	}
+
+	//Send the stop bit, ending this session
+	I2C1CONbits.PEN = 1;
+	I2CWait();     //wait for interrupt
+}
+
+void ReadGyro(BYTE *pGyroData) {
+	int i;
+	//Send a start bit
+	I2C1CONbits.SEN = 1;
+	I2CWait();     //wait for interrupt
+
+	//Read data packet
+	for(i = 0; i<6;i++)
+	{
+		//Transmit the I2C address byte
+		I2C1TRN = GYRO_ADDRESS | I2C_WRITE;
+		I2CWait();     //wait for interrupt
+		I2C1TRN = i+L3G4200_X_L;
+		I2CWait();     //wait for interrupt
+
+		//Send a restart bit
+		I2C1CONbits.RSEN = 1;
+		I2CWait();     //wait for interrupt
+		
+		I2C1TRN = GYRO_ADDRESS | I2C_READ;
+		I2CWait();     //wait for interrupt
+
+		//Receive a data byte
+		I2C1CONbits.RCEN = 1;
+		I2CWait();     //wait for interrupt
+		//Read data
+		pGyroData[i] = I2C1RCV;
+
+		I2C1CONbits.RSEN = 1;
+		I2CWait();     //wait for interrupt
+
+
+	}
+
+	//Send the stop bit, ending this session
+	I2C1CONbits.PEN = 1;
+	I2CWait();     //wait for interrupt
+}
 
 
 void SetupGyro(void) {
