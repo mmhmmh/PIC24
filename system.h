@@ -76,6 +76,8 @@
 #include "rtcc.h"
 //#include "buttons.h"
 //#include "ctmu.h"
+#include "spi1.h"
+#include "nrf24l01.h"
 #include "eeprom.h"
 //#include "sensors.h"
 //#include "transmit.h"

@@ -10,7 +10,7 @@
 *
 * Copyright and Disclaimer Notice
 *
-* Copyright ©2007-2008 Microchip Technology Inc.  All rights reserved.
+* Copyright ?007-2008 Microchip Technology Inc.  All rights reserved.
 *
 * Microchip licenses to you the right to use, modify, copy and distribute
 * Software only when embedded on a Microchip microcontroller or digital
@@ -81,6 +81,26 @@ void InitI2C(void)
     _MI2C1P = 1;            //Set interrupt priority to prevent ISR execution
 }
 
+
+void InitSPI(void)
+{
+	_SPI1MD = 0;
+
+	IEC0bits.SPI1IE = 0;
+
+	SPI1CON1 = 0;
+	SPI1CON1bits.MSTEN = 1;
+	SPI1CON1bits.PPRE0 = 1;
+	SPI1CON1bits.PPRE1 = 1;
+	SPI1CON1bits.SPRE = 0x06;
+
+	SPI1CON2 = 0;
+	//SPI1CON2bits.SPIBEN = 1;
+
+	SPI1STATbits.SPIROV = 0;
+	SPI1STATbits.SPIEN = 1;
+
+}
 
 /****************************************************************************
   Function:
@@ -611,75 +631,7 @@ void StoreData(WORD addr, WORD data, BYTE type)
   ***************************************************************************/
 void StoreSensorData(void)
 {
-    #ifdef USE_PWRCTL
-    if(PWRCTL_PORT == 1)        //turn external power on
-    {
-        mPWR_ON();
-        IdleMs(EEPROM_WAIT);
-    }
-    #endif
-
-    if(tasks.bits.transmit)  //indicate operating state if UART Enabled
-    {
-        _UxMD = 0;
-        UARTInit();
-        UARTPrintString("Storing Data...\r\n") ;
-        _UxMD = 1;
-    }
-
-    InitI2C();                  //Initalize EEPROM comms
-
-    //Select active sensor and Store data
-    switch(tasks.bits.mode)
-    {
-        case MODE_TEMP:         //Store temperature
-
-            StoreData(eeAddress,tempVal,TEMP_DATA);
-            break;
-
-        case MODE_POT:          //Store POT and bandgap reference voltage
-
-            StoreData(eeAddress,vddVal,VDD_DATA);
-            StoreData(eeAddress,potVal,POT_DATA);
-            break;
-
-        #ifdef USE_CAPTOUCH
-        case MODE_CAP:          //Store cap button statues
-
-            StoreData(eeAddress,pressedCT1,CT1_DATA);
-            #ifndef CT2_IGNORE
-            StoreData(eeAddress,pressedCT2,CT2_DATA);
-            #endif
-            StoreData(eeAddress,pressedCT3,CT3_DATA);
-            break;
-        #endif
-
-        case MODE_ALL:          //Store temperature,cap button statues, POT and bandgap reference voltage
-
-            StoreData(eeAddress,tempVal,TEMP_DATA);
-            StoreData(eeAddress,vddVal,VDD_DATA);
-            StoreData(eeAddress,potVal,POT_DATA);
-
-            #ifdef USE_CAPTOUCH
-                StoreData(eeAddress,pressedCT1,CT1_DATA);
-                #ifndef CT2_IGNORE
-                StoreData(eeAddress,pressedCT2,CT2_DATA);
-                #endif
-                StoreData(eeAddress,pressedCT3,CT3_DATA);
-            #endif
-            break;
-
-        default:
-
-            break;
-    }
-
-    CloseI2C();                 //disable I2C
-    #ifdef USE_PWRCTL
-    mPWR_OFF();
-    #endif
-
-    tasks.bits.store = 0;    //clear storing task flag
+    
 }//end StoreSensorData()
 
 
@@ -706,148 +658,7 @@ void StoreSensorData(void)
 void TransmitEEPROM(WORD addrMin,WORD addrMax)
 {
 
-    WORD addr=addrMin;
-    WORD dataVal;
-    WORD temp;
-    BYTE readData[16];
 
-    //Display data from min to max
-    while(addr<addrMax)
-    {
-
-        //Read data packet from EEPROM
-        UARTPrintString("Reading...");
-        readPacket(addr,readData,10);
-
-        //Display address
-        UARTPrintString("Addr: 0x");
-        UARTPutHexWord(addr);
-
-        //Display Timestamp
-        UARTPutChar(' ');
-        UARTPutHex(readData[1]);        //month
-        UARTPutChar('/');
-        UARTPutHex(readData[2]);        //day
-        UARTPrintString("/20");
-        UARTPutHex(readData[0]);        //year
-        UARTPutChar(' ');
-        UARTPutHex(readData[3]);        //week day
-        UARTPutChar(' ');
-        UARTPutHex(readData[4]);        //hour
-        UARTPutChar(':');
-        UARTPutHex(readData[5]);        //minute
-        UARTPutChar(':');
-        UARTPutHex(readData[6]);        //second
-        UARTPutChar(' ');
-
-        //Display Datatype
-        switch(readData[7])
-        {
-            case POT_DATA:
-                UARTPrintString("POT Voltage: ");
-
-                dataVal = (((WORD)readData[8])<<8) + readData[9];
-
-                temp = dataVal/1000;
-                UARTPutChar(temp%10 + '0');
-
-                UARTPutChar('.');
-
-                temp = dataVal/100;
-                UARTPutChar(temp%10 + '0');
-
-                temp = dataVal/10;
-                UARTPutChar(temp%10 + '0');
-
-                temp = dataVal;
-                UARTPutChar(temp%10 + '0');
-                UARTPutChar('V');
-                break;
-            case VDD_DATA:
-                UARTPrintString("VDD Voltage: ");
-
-                dataVal = (((WORD)readData[8])<<8) + readData[9];
-
-                temp = dataVal/1000;
-                UARTPutChar(temp%10 + '0');
-
-                UARTPutChar('.');
-
-                temp = dataVal/100;
-                UARTPutChar(temp%10 + '0');
-
-                temp = dataVal/10;
-                UARTPutChar(temp%10 + '0');
-
-                temp = dataVal;
-                UARTPutChar(temp%10 + '0');
-                UARTPutChar('V');
-                break;
-            case TEMP_DATA:
-                UARTPrintString("Temp: ");
-
-                dataVal = (((WORD)readData[8])<<8) + readData[9];
-
-                temp = dataVal/100;
-                UARTPutChar(temp%10 + '0');
-
-                temp = dataVal/10;
-                UARTPutChar(temp%10 + '0');
-
-                UARTPutChar('.');
-
-                temp = dataVal;
-                UARTPutChar(temp%10 + '0');
-
-                UARTPutChar('C');
-
-                break;
-            case CT1_DATA:
-                UARTPrintString("Touch: ");
-                dataVal = (((WORD)readData[8])<<8) + readData[9];
-                if(dataVal != 0)
-                    UARTPrintString("Cap touch button 1 pressed ");
-                else
-                    UARTPrintString("Cap touch button 1 unpressed ");
-                break;
-            case CT3_DATA:
-                UARTPrintString("Touch: ");
-                dataVal = (((WORD)readData[8])<<8) + readData[9];
-                if(dataVal != 0)
-                    UARTPrintString("Cap touch button 3 pressed ");
-                else
-                    UARTPrintString("Cap touch button 3 unpressed ");
-                break;
-            case CT2_DATA:
-                UARTPrintString("Touch: ");
-                dataVal = (((WORD)readData[8])<<8) + readData[9];
-
-                if(dataVal != 0)
-                    UARTPrintString("Cap touch button 2 pressed ");
-                else
-                    UARTPrintString("Cap touch button 2 unpressed ");
-                break;
-
-            case N0_CT_PRESSED:
-                UARTPrintString("Touch: ");
-                dataVal = (((WORD)readData[8])<<8) + readData[9];
-                UARTPrintString("No button pressed ");
-                break;
-            default:
-                UARTPrintString("Unknown: 0x");
-
-                UARTPutHex(readData[8]);
-                UARTPutHex(readData[9]);
-
-                break;
-        }
-
-        //Display data
-        UARTPutChar('\r');
-        UARTPutChar('\n');
-
-        addr+=0x10;
-    }
 }//end TransmitEEPROM(..)
 
 

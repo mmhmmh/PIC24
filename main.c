@@ -69,7 +69,7 @@
     _FOSC(FCKSM_CSECMD & POSCFREQ_MS & OSCIOFNC_ON & POSCMOD_NONE & SOSCSEL_SOSCLP)
     _FWDT(FWDTEN_OFF & WINDIS_OFF & FWPSA_PR128 & WDTPS_PS32768)
     _FPOR(MCLRE_ON & BORV_LPBOR & BOREN_BOR3 & I2C1SEL_PRI & PWRTEN_OFF)
-    _FICD(ICS_PGx3)
+    _FICD(ICS_PGx2)
     _FDS(DSWDTEN_OFF & DSBOREN_ON & DSWDTOSC_SOSC & DSWDTPS_DSWDTPSF) //DSWDT SOSC = LPRC
 #elif defined __PIC24F16KA102__
     // Setup configuration bits
@@ -92,7 +92,6 @@
 #define MAG_ADDRESS      0x3C
 #define GYRO_ADDRESS      0xD0
 #define ACC_ADDRESS      0x38
-
 
 #define I2C_WRITE           0x00
 #define I2C_READ            0x01
@@ -164,7 +163,7 @@
 /****************************************************************************
   Section: Global Variables
   ***************************************************************************/
-//RTCCFORM rtcc;          //RTCC read/write structure
+RTCCFORM rtcc;          //RTCC read/write structure
 
 WORD eeAddress = 0;     //EEPROM address pointer
 WORD potVal;            //POT reading in mV
@@ -214,10 +213,12 @@ int main(void)
     HandleReset(); //Process reset events (POR/DPSLP)
 
     IdleMs(500);
-    
-	InitI2C();
-	
+
+    InitI2C();
+	InitSPI();
 	IdleMs(500);
+
+	nrf24l01_initialize_debug(false, 1, false);
 
 	SetupGyro();
 	SetupMag();
@@ -235,7 +236,43 @@ int main(void)
    	BYTE *pAccData;
    	pAccData = accDataVal;
 
-	while(1)
+   	_UxMD = 0;      //Enable UART
+   	UARTInit();
+   	BYTE dataIn = 0x00;
+   	while(1) {
+   		dataIn += 1;
+   		BYTE dataOut = 0x00;
+   		CSN1_LAT = 0;
+   		dataOut = spi1_send_read_byte(dataIn);
+   		CSN1_LAT = 1;
+
+   		UARTPrintString("Input:");
+   		UARTPutHex(dataIn);
+   		UARTPrintString("Output:");
+   		UARTPutHex(dataOut);
+   	}
+
+   	while(0) {
+   		BYTE registerData[40];
+   		BYTE *pRegisterData = registerData;
+   		nrf24l01_get_all_registers(pRegisterData);
+   		registerData[39] = '\0';
+   		int i;
+   		for (i=0; i<35;i++) {
+   			UARTPutHex(registerData[i]);
+   		}
+   		IdleMs(1000);
+   		IdleMs(1000);
+   		IdleMs(1000);
+   		IdleMs(1000);
+   	    IdleMs(1000);
+   	    IdleMs(1000);
+   	    IdleMs(1000);
+   	    IdleMs(1000);
+   	    IdleMs(1000);
+   	}
+
+	while(0)
     {	
 		ReadMag(pData);
 		//********************************************************************************************
@@ -558,50 +595,35 @@ void InitIO(void)
     TRISA = 0;
     TRISB = 0;
 
-    AD1PCFG = 0xFFFF;   //all I/O as digital
+    ANSA = 0; //All digital
+    ANSB = 0; //All digital
 
-    POT_AN = 0;         //POT as analog input
-    TEMP_AN = 0;        //Temp sensor as analog input
-    POT_TRIS = 1; 
-    TEMP_TRIS = 1;
+    // 1 is input - 0 is output
 
-
-    PWRCTL_TRIS = 0;    //ICPWR OL
-    #ifdef USE_PWRCTL
-    mPWR_OFF();
-    #endif
-
-    TEMP_TRIS = 1;      //AN1 TEMP IN
-    POT_TRIS = 1;       //HLVD/POT IN
-
+    //I2C Port Configuration
     SCL_TRIS = 1;       //SCL IH
     SDA_TRIS = 1;       //SDA IH
 
-    mSetLED2Tris(1);
-    mSetLED3Tris(1);
-
+    //UART port configuration
     UTX_LAT = 0;
     UTX_TRIS = 0;       //U2TX OL
     URX_TRIS = 1;       //U2RX IH
 
-    #ifdef __PIC24FJ64GA102__
-        RPINR19bits.U2RXR = 1;
-        RPOR0bits.RP0R = 5;
-    #endif
+	CSN1_LAT = 1;
+	CSN1_TRIS = 0;
 
-	#ifdef USE_HARVESTER
-        #ifdef CYMBET_EVAL08
-        CHARGE_TRIS = 0;    //EVAL-08 Cymbet documentation - drive Charge low until time to read
-        CHARGE_LAT = 0;
-        BATOFF_TRIS = 0;    //BATOFF is output, drive low to enable batteries
-        BATOFF_LAT = 0;
-        #elif defined(IPS_XLP_BOARD)
-        REG_EN_TRIS = 0;    //Set REG_EN and UVP_EN lines to output
-        UVP_EN_TRIS = 0;
-        REG_EN_LAT = 1;     //enable Under voltage Protection (UVP) and 3.3V Regulator		
-        UVP_EN_LAT = 1;
-        #endif
-	#endif
+	CSN2_LAT = 1;
+    CSN2_TRIS = 0;
+
+	CE1_LAT = 0;
+	CE1_TRIS = 0;
+
+	CE2_LAT = 0;
+    CE2_TRIS = 0;
+
+    SCK_TRIS = 0;
+    SDI_TRIS = 1;
+    SDO_TRIS = 0;
 
 }//end InitIO
 
@@ -632,6 +654,13 @@ void InitSystem (void)
     PMD2 = 0xFFFF;
     PMD3 = 0xFDFF;  //Enable RTCC
     PMD4 = 0xFFFF;
+
+    AD1CON1 = 0;
+    AD1CON2 = 0;
+    AD1CON3 = 0;
+    AD1CON5 = 0;
+
+    HLVDCON = 0; // Disable HLV
 
     CLKDIVbits.RCDIV = 0;                   //Set FRCDIV to 8 MHz operation
     __builtin_write_OSCCONL(OSCCON | 0x02); //Enable 32kHz OSC
@@ -815,55 +844,6 @@ void HandleReset(void)
                 UARTPrintString("MCLR reset occurred.\r\n\r\n");
             }
         }
-    
-        SW2_TRIS = 1;
-        SW2_PULLUP = 1;                 //Enable INT0 pullup
-        SW3_TRIS = 1;
-        SW3_PULLUP = 1;                 //Enable RB14 pullup
-        IdleUs(5);                      //allow I/O to transition high after enabling pullup
-
-        if(SW2_PORT == 0)               //SW2 held on startup, reset eeAddress & RTCC
-        {                               
-            SW2_PULLUP = 0;             //disable pullup to save current
-            SW3_PULLUP = 0;             //disable pullup to save current
-
-            eeAddress = 0x10;           //Reset eeAddress & RTCC
-            InitCalendar();
-
-            if(tasks.bits.transmit)
-            {
-                _UxMD = 0;
-                UARTInit();
-                UARTPrintString("***Datalog reset!***\n\r");
-            }
-        }
-        else if(SW3_PORT == 0)          //SW3 held on startup, transmit datalog
-        {
-            SW2_PULLUP = 0;             //disable pullup to save current
-            SW3_PULLUP = 0;             //disable pullup to save current
-
-            InitI2C();                  
-            GetAddress();               //Enable I2C and read Stored eeAddress & RTCC
-            GetTimestamp((eeAddress>0x10)?(eeAddress-0x10):0x10); //Get previous time
-
-            //Transmit entire EEPROM contents
-            _UxMD = 0;
-            UARTInit();
-            UARTPrintString("Transmitting datalog:\n\r");
-            TransmitEEPROM(0x10,eeAddress);
-            UARTPrintString("Datalog Transmit done!\n\r");
-
-        }
-        else                            //Nothing pressed, normal startup: load eeAddress and RTCC info from EEPROM
-        {
-            SW2_PULLUP = 0;             //disable pullup to save current
-            SW3_PULLUP = 0;             //disable pullup to save current
-
-            InitI2C();                  //Enable I2C and read Stored eeAddress & RTCC
-            GetAddress();
-            GetTimestamp((eeAddress>0x10)?(eeAddress-0x10):0x10); //Get previous time
-        }
-
         switch(ALARM_PERIOD)
         {
             case ONE_SECOND:
@@ -876,38 +856,9 @@ void HandleReset(void)
                 break;
         }        
 		
-        lpMode = DEFAULT_MODE;          //Set Initial LP and sensor modes
-        tasks.bits.mode = DEFAULT_SENSOR;
-
-        #ifdef USE_CAPTOUCH
-        if(tasks.bits.mode > MODE_POT)  //Sensor type includes cap button detecting
-        {
-            if(lpMode > LP_SLEEP)       //DPSLP is not supported
-            {
-                lpMode = LP_SLEEP;      //force low power mode to sleep
-
-                if(tasks.bits.transmit) //Transmit switch to PC if TX en
-                {
-                    UARTPrintString("Cap Touch buttons not supported in Deep Sleep.\r\n");
-                    UARTPrintString("Changing low power mode to Sleep.\r\n");
-                }
-            }
-
-            InitCapSense();             //Init cap sensing
-            CapSenseTickInit();         //Enable Timer1 for cap button detecting
-        }
-        #endif
-
-        tasks.bits.sample = 1;          //Take & Store first Sample
-        tasks.bits.store = 1;
-
         RCON=0;                         //Clear reset flags
 
     }//end if(RCONbits.DPSLP)
-
-    #ifdef USE_PWRCTL
-    mPWR_OFF();     //Disable external circuits and UART to save power
-    #endif
     _UxMD = 1;
 }//end HandleReset
 

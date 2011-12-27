@@ -102,8 +102,10 @@ void InitRTCC(void)
     RCFGCALbits.RTCEN = 0;          //RTCC Enabled
     RCFGCALbits.RTCWREN = 0;        //Disabled RTCC value write
 
-    PADCFG1bits.RTSECSEL = 0b11;    //RTCC Seconds Clock is not selected for the RTCC pin
+    //TODO: Investigate what this does
+    //PADCFG1bits.RTSECSEL = 0b11;    //RTCC Seconds Clock is not selected for the RTCC pin
 
+ 
     //Interrupt configuration
     IFS3bits.RTCIF = 0;             //Clear RTCC Alarm interrupt flag
     IEC3bits.RTCIE = 0;             //RTCC Alarm interrupt Enabled
