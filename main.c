@@ -206,23 +206,26 @@ DEMO_TASKS tasks;       //Tasks to execute flags
 int main(void)
 {
 
-    WORD_VAL modes;
+    //WORD_VAL modes;
 
     InitIO();      //configure I/O
     InitSystem();  //Initial system Setup
-    HandleReset(); //Process reset events (POR/DPSLP)
+    //HandleReset(); //Process reset events (POR/DPSLP)
 
     IdleMs(500);
 
-    InitI2C();
+    //InitI2C();
 	InitSPI();
 	IdleMs(500);
 
-	nrf24l01_initialize_debug(false, 1, false);
+	//nrf24l01_initialize_debug(false, 1, false);
 
-	SetupGyro();
-	SetupMag();
-    SetupAcc();
+	IdleMs(500);
+
+
+	//SetupGyro();
+	//SetupMag();
+    //SetupAcc();
 
 	BYTE dataVal[6];
     BYTE *pData;
@@ -239,27 +242,79 @@ int main(void)
    	_UxMD = 0;      //Enable UART
    	UARTInit();
    	BYTE dataIn = 0x00;
-   	while(1) {
+
+   	while(0) {
+   		BYTE dataOut = 0x00;
+   		dataIn = 0xFF;
+   		//CSN1_LAT = 0;
+   		//CSN1_LAT = 1;
+   		dataOut = spi1_send_read_byte(dataIn);
+   		UARTPutHex(dataOut);
+   		IdleMs(1000);
+		IdleMs(1000);
+		IdleMs(1000);
+		IdleMs(1000);
+		IdleMs(1000);
+   	}
+
+   	while(0) {
    		dataIn += 1;
    		BYTE dataOut = 0x00;
-   		CSN1_LAT = 0;
+   		//CSN1_LAT = 0;
    		dataOut = spi1_send_read_byte(dataIn);
-   		CSN1_LAT = 1;
+   		//CSN1_LAT = 1;
 
    		UARTPrintString("Input:");
    		UARTPutHex(dataIn);
    		UARTPrintString("Output:");
    		UARTPutHex(dataOut);
+   		UARTPrintString("\r\n");
+
+   		IdleMs(1000);
+		IdleMs(1000);
+		IdleMs(1000);
    	}
 
+   	//nrf24l01_power_down();
+
    	while(0) {
+   		BYTE data;
+
+   		CSN1_LAT = 0;
+		data = spi1_send_read_byte(0xff);
+		UARTPutHex(data);
+		CSN1_LAT = 1;
+
+   		CSN1_LAT = 0;
+		data = spi1_send_read_byte(0x07);
+		UARTPutHex(data);
+		data = spi1_send_read_byte(0x00);
+		UARTPutHex(data);
+		CSN1_LAT = 1;
+
+//   	   	nrf24l01_write_register(nrf24l01_EN_AA, data, 1);
+//   	   	nrf24l01_read_register(nrf24l01_EN_AA, data, 1);
+   	   	IdleMs(1000);
+		IdleMs(1000);
+		IdleMs(1000);
+		IdleMs(1000);
+		IdleMs(1000);
+		IdleMs(1000);
+		IdleMs(1000);
+   	}
+
+   	while(1) {
    		BYTE registerData[40];
    		BYTE *pRegisterData = registerData;
    		nrf24l01_get_all_registers(pRegisterData);
    		registerData[39] = '\0';
    		int i;
    		for (i=0; i<35;i++) {
+   			UARTPrintString("Register");
+   			UARTPutHex(i);
+   			UARTPrintString(": ");
    			UARTPutHex(registerData[i]);
+   			UARTPrintString("\r\n");
    		}
    		IdleMs(1000);
    		IdleMs(1000);
@@ -622,8 +677,10 @@ void InitIO(void)
     CE2_TRIS = 0;
 
     SCK_TRIS = 0;
+    SCK_LAT = 0;
     SDI_TRIS = 1;
     SDO_TRIS = 0;
+    SDO_LAT = 0;
 
 }//end InitIO
 

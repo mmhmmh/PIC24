@@ -14,14 +14,11 @@
 unsigned char spi1_send_read_byte(unsigned char byte)
 {
 	BYTE outData = 0x00;
-	//	CSN1_LAT = 0;                           //Select Device
-	if (SPI1CON1bits.MODE16) {
-        SPI1BUF = byte;
-	} else {
-        SPI1BUF = byte & 0xff;    /*  byte write  */
-	}
+	SPI1BUF = byte;
+
 	while(SPI1STATbits.SPITBF);
-//	CSN1_LAT = 1;                           //Deselect Device
+	while(SPI1STATbits.SPIRBF == 0);
+
 	outData = SPI1BUF;						//read the buffer
 	return outData;
 }	

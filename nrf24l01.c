@@ -158,11 +158,11 @@ void nrf24l01_initialize_debug(bool rx, unsigned char p0_payload_width, bool ena
 	
 	config = nrf24l01_CONFIG_DEFAULT_VAL | nrf24l01_CONFIG_PWR_UP;
 	
-	if(enable_auto_ack != false)
-		en_aa = nrf24l01_EN_AA_ENAA_P0;
-	else
-		en_aa = nrf24l01_EN_AA_ENAA_NONE;
-	
+//	if(enable_auto_ack != false)
+//		en_aa = nrf24l01_EN_AA_ENAA_P0;
+//	else
+//		en_aa = nrf24l01_EN_AA_ENAA_NONE;
+	en_aa = 0x00;
 	if(rx == true)
 		config = config | nrf24l01_CONFIG_PRIM_RX;
 		
@@ -969,16 +969,8 @@ void nrf24l01_get_all_registers(unsigned char * data)
 	
 	for(outer = 0; outer <= 0x17; outer++)
 	{
-		nrf24l01_read_register(outer, buffer, 5);
-		
-		for(inner = 0; inner < 5; inner++)
-		{
-			if(inner >= 1 && (outer != 0x0A && outer != 0x0B && outer != 0x10))
-				break;
-				
-			data[dataloc] = buffer[inner];
-			dataloc++;
-		}
+		nrf24l01_read_register(outer, buffer, 1);
+		data[outer] = buffer[0];
 	}
 }
 

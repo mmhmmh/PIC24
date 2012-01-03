@@ -159,6 +159,10 @@ typedef union _TASK_VAL
   ***************************************************************************/
 void InitIO(void);
 void InitSystem(void);
+void InitSPI(void);
+void ReadGyro(BYTE *pGyroData);
+void ReadMag(BYTE *pMagData);
+void ReadAcc(BYTE *pAccData);
 void HandleReset(void);
 
 void IdleUs(int timeUs);
