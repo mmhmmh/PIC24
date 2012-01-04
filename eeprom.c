@@ -89,9 +89,11 @@ void InitSPI(void)
 	IEC0bits.SPI1IE = 0;
 
 	SPI1CON1 = 0;
+	SPI1CON1bits.CKE = 1;
+	SPI1CON1bits.CKP = 0;
 	SPI1CON1bits.MSTEN = 1;
 	SPI1CON1bits.PPRE0 = 0;
-	SPI1CON1bits.PPRE1 = 1;
+	SPI1CON1bits.PPRE1 = 0;
 	SPI1CON1bits.SPRE0 = 1;
 	SPI1CON1bits.SPRE1 = 1;
 	SPI1CON1bits.SPRE2 = 1;
