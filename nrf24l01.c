@@ -884,9 +884,9 @@ bool nrf24l01_fifo_rx_empty()
 //returns true forced because we are not using IRQ atm
 bool nrf24l01_irq_pin_active()
 {
-//	if((nrf24l01_IRQ_IOREGISTER & nrf24l01_IRQ_PINMASK) != 0)
-//		return false;
-//	else
+	if((nrf24l01_IRQ_IOREGISTER) != 0)
+		return false;
+	else
 		return true;
 }
 

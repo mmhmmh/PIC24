@@ -160,9 +160,7 @@ typedef union _TASK_VAL
 void InitIO(void);
 void InitSystem(void);
 void InitSPI(void);
-void ReadGyro(BYTE *pGyroData);
-void ReadMag(BYTE *pMagData);
-void ReadAcc(BYTE *pAccData);
+
 void HandleReset(void);
 
 void IdleUs(int timeUs);
@@ -172,15 +170,6 @@ void IdleMs(int timeMs);
 /****************************************************************************
   Section: Global Variables
   ***************************************************************************/
-extern WORD eeAddress;
-extern WORD potVal;
-extern WORD tempVal;
-extern WORD vddVal;
-extern WORD pressedCT1;
-extern WORD pressedCT2;
-extern WORD pressedCT3;
-extern LP_MODES lpMode;
-extern DEMO_TASKS tasks;
 
 
 /****************************************************************************

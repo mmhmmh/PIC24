@@ -4,18 +4,18 @@
 *   Demo has 3 low power modes and 4 sensor modes.
 *   Low power modes:    Sleep (default), Deep Sleep, and Idle
 *   Sensor modes:       Temprature, Voltage, Capacitance, and All Sensors
-*    
+*
 *   In Temprature and Voltage modes the MCU wakes up on RTCC interrupt or
 *   S2 button press to take a sample and store to external EEPROM.
 *
 *   In Capacitance and All sensor modes MCU wakes up on T1 interrupt to
 *   sample Cap sense buttons.  Sample & storage occur on Cap sense button
 *   press only.
-*   
+*
 *   Switch Low power and sensor modes by holding S2 or S3.
 *
 *   Toggle UART transmission of data with S3 press.  EEPROM datalog can be
-*   transmitted out on UART by resetting while holding S3.  
+*   transmitted out on UART by resetting while holding S3.
 *****************************************************************************
 * FileName:     main.c
 * Dependencies: system.h
@@ -81,14 +81,14 @@
     _FPOR(MCLRE_ON & BORV_LPBOR & BOREN_BOR3 & I2C1SEL_PRI & PWRTEN_OFF)
     _FICD(BKBUG_OFF & ICS_PGx3)
     _FDS(DSWDTEN_OFF & DSBOREN_ON & RTCOSC_SOSC & DSWDTOSC_SOSC & DSWDTPS_DSWDTPSF) //DSWDT SOSC = LPRC
-#elif defined(__PIC24FJ64GA102__)  
+#elif defined(__PIC24FJ64GA102__)
     // Setup configuration bits
     _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & ICS_PGx3 & FWDTEN_OFF & WINDIS_OFF)
     _CONFIG2(IESO_ON & FCKSM_CSECMD & OSCIOFNC_ON & POSCMOD_NONE & FNOSC_FRC)
     _CONFIG3(SOSCSEL_LPSOSC & WUTSEL_FST & WPDIS_WPDIS & WPCFG_WPCFGDIS)
     _CONFIG4(DSWDTEN_OFF & RTCOSC_SOSC & DSWDTPS_DSWDTPS6 & DSWDTOSC_LPRC & DSBOREN_OFF)
 #endif
-   
+
 
 
 /****************************************************************************
@@ -126,28 +126,24 @@ int main(void)
 	int j;
 	BYTE data[32];
 
-	for (j=0; j<32; j++) {
-		data[j] = j;
-	}
-
     InitIO();      //configure I/O
     InitSystem();  //Initial system Setup
     //HandleReset(); //Process reset events (POR/DPSLP)
 
     IdleMs(500);
 
-    InitI2C();
+    //InitI2C();
 	InitSPI();
 	IdleMs(500);
 
-//	nrf24l01_initialize_debug(false, 32, false);
+	nrf24l01_initialize_debug(true, 32, false);
 
 	IdleMs(500);
 
 
-	SetupGyro();
-	SetupMag();
-    SetupAcc();
+	//SetupGyro();
+	//SetupMag();
+    //SetupAcc();
 
 	BYTE dataVal[6];
     BYTE *pData;
@@ -156,7 +152,7 @@ int main(void)
 	BYTE gyroDataVal[6];
    	BYTE *pGyroData;
    	pGyroData = gyroDataVal;
-   	
+
    	BYTE accDataVal[6];
    	BYTE *pAccData;
    	pAccData = accDataVal;
@@ -225,16 +221,17 @@ int main(void)
 		IdleMs(1000);
    	}
 
-   	while(0) {
-   		nrf24l01_write_tx_payload(data, 32, true);
-   		while(!(nrf24l01_irq_pin_active() && nrf24l01_irq_tx_ds_active()));
-   		nrf24l01_irq_clear_all();
-   		IdleMs(1000);
-		IdleMs(1000);
-		IdleMs(1000);
-		IdleMs(1000);
-		IdleMs(1000);
+   	while(1) {
+   		if((nrf24l01_irq_rx_dr_active()))
+		{
+			nrf24l01_read_rx_payload(&data, 32); //get the payload into data
+			break;
+		}
 
+   		for (j = 0; j<32; j++) {
+   			UARTPutHex(data[j]);
+   		}
+   		nrf24l01_irq_clear_all();
    	}
 
    	while(0) {
@@ -261,8 +258,8 @@ int main(void)
    	    IdleMs(1000);
    	}
 
-	while(1)
-    {	
+	while(0)
+    {
 		ReadMag(pData);
 		//********************************************************************************************
 		//Gyroscope code
@@ -271,71 +268,71 @@ int main(void)
 		//*****************************************************
 		//Acc Code
 		ReadAcc(pAccData);
-		
+
 		//***************************************************
 		//UART Code
 		_UxMD = 0;      //Enable UART
 	    UARTInit();
-	    
+
 	    #ifdef ACC_OUT_EN
 			//UARTPrintString("AccX: ");
 			UARTPutHex(pAccData[0]);
 			UARTPutHex(pAccData[1]);
 			UARTPrintString(",");
-			
+
 			//UARTPrintString("AccY: ");
 			UARTPutHex(pAccData[2]);
 			UARTPutHex(pAccData[3]);
 			UARTPrintString(",");
-	
+
 			//UARTPrintString("AccZ: ");
 			UARTPutHex(pAccData[4]);
 			UARTPutHex(pAccData[5]);
 			UARTPrintString(",");
 			//UARTPrintString("\r\n");
 		#endif
-		
+
 		#ifdef MAG_OUT_EN
 			//UARTPrintString("MagX: ");
 			UARTPutHex(pData[0]);
 			UARTPutHex(pData[1]);
 			UARTPrintString(",");
-			
+
 			//UARTPrintString("MagY: ");
 			UARTPutHex(pData[2]);
 			UARTPutHex(pData[3]);
 			UARTPrintString(",");
-	
+
 			//UARTPrintString("MagZ: ");
 			UARTPutHex(pData[4]);
 			UARTPutHex(pData[5]);
 			UARTPrintString(",");
 			//UARTPrintString("\r\n");
 		#endif
-		
+
 		#ifdef GYRO_OUT_EN
 			//UARTPrintString("GyroX: ");
 			UARTPutHex(pGyroData[1]);
 			UARTPutHex(pGyroData[0]);
 			UARTPrintString(",");
-			
+
 			//UARTPrintString("GyroY: ");
 			UARTPutHex(pGyroData[3]);
 			UARTPutHex(pGyroData[2]);
 			UARTPrintString(",");
-	
+
 			//UARTPrintString("GyroZ: ");
 			UARTPutHex(pGyroData[5]);
 			UARTPutHex(pGyroData[4]);
 			UARTPrintString("\r\n");
 
 		#endif
-		
+
 	    _UxMD = 1;
 
 		IdleMs(100);
-		
-        
+
+
     }//end while(1)
 	return 0;
 }//end main
@@ -395,7 +392,8 @@ void InitIO(void)
 	CE1_LAT = 0;
 	CE1_TRIS = 0;
 
-	N24_INT_TRIS = 1;
+	CE2_LAT = 0;
+    CE2_TRIS = 0;
 
     SCK_TRIS = 0;
     SCK_LAT = 0;
@@ -443,7 +441,7 @@ void InitSystem (void)
     CLKDIVbits.RCDIV = 0;                   //Set FRCDIV to 8 MHz operation
     __builtin_write_OSCCONL(OSCCON | 0x02); //Enable 32kHz OSC
     SRbits.IPL = 2;                         //CPU > 1, no lvl 1 ISRs occur
-	
+
 }
 
 

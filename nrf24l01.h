@@ -109,7 +109,7 @@
 //defines for uC pins IRQ pin is connected to
 //This is used so that the routines can poll for IRQ or create an ISR.
 //Change these definitions (and then recompile) to suit your particular application.
-#define nrf24l01_IRQ_IOREGISTER
+#define nrf24l01_IRQ_IOREGISTER N24_INT_LAT
 
 
 ////////////////////////////////////////////////////////////////////////////////////

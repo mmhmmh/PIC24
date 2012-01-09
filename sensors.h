@@ -46,68 +46,87 @@
   ***************************************************************************/
 #include "system.h"
 
+#define MAG_ADDRESS      0x3C
+#define GYRO_ADDRESS      0xD0
+#define ACC_ADDRESS      0x38
 
-/****************************************************************************
-  Section: Defines and Typedefs
-  ***************************************************************************/
-//ADC and sensor configuration
-#define TEMP_TAD        31          //fast TAD, so use max Sample time for accuracy
-#define POT_TAD         31
-#define VBG_TAD         31
-#define VBG_VAL         1210UL*1024UL //VBG = 1.21V, VBG_VAL = 1210 mV * 1024 counts (10 bit ADC)
-#define VBG_CHANNEL     15
-#define VBG_AN          AD1PCFGbits.PCFG15
+#define I2C_WRITE           0x00
+#define I2C_READ            0x01
 
-//temp sensor switch
-#define MCP9700         0
-#define DIODE           1
-#define TEMP_SENSOR     MCP9700   //Temp sensor mode: DIODE or MCP9700
+#define HMC5883_ModeRegisterAddress 0x02
+#define HMC5883_ContinuousModeCommand 0x00
 
-//temp sensor Initial voltages and temp constants
-//Temp equation: T = (V - V0)/TC
-#define MCP_TC          10      //MCP9700 temp constant TC = 10mV/*C
-#define MCP_V0          5000    //MCP V @ 0*C = 500 mV (scaled up by 10 for 0.1*C res)
-#define DIODE_TC        28      //1N4148 temp constant TC=-2.8mV/*C
-#define DIODE_V0        39000   //1N4148 Diode Vf @ 0*C = 390mV
-                                //Diode vals scaled up to Get 0.1*C resolution
+#define HMC5883_ConfARegisterAddress 0x00
+#define HMC5883_ConfBRegisterAddress 0x01
+#define HMC5883_75HzCommand 0x18
 
-//Sensor operating modes enumeration
-typedef enum
-{
-    MODE_TEMP,
-    MODE_POT,
-#ifdef USE_CAPTOUCH
-    MODE_CAP,
-#endif
-    MODE_ALL
-} SENSOR_MODES;
+#define L3G4200_CTRL_REG1 0x20
+#define L3G4200_CTRL_REG1_SET 0x7F
 
-//sensor data type
-typedef enum
-{
-    CT1_DATA=1,
-    CT2_DATA=2,
-    CT3_DATA=3,
-    N0_CT_PRESSED=4,
-    POT_DATA=5,
-    VDD_DATA=6,
-    TEMP_DATA=7
-} SENSOR_TYPES;
+#define L3G4200_CTRL_REG2 0x21
+#define L3G4200_CTRL_REG2_SET 0x20
 
-/****************************************************************************
-  Section: Function Prototypes
-  ***************************************************************************/
+#define L3G4200_CTRL_REG3 0x22
+#define L3G4200_CTRL_REG3_SET 0x00
 
-//ADC operation functions
-void InitADC(void);
-WORD GetADCChannel(BYTE channel,BYTE timeTAD);
+#define L3G4200_CTRL_REG4 0x23
+#define L3G4200_CTRL_REG4_SET 0x10
 
-//Sensor sampling functions
-void SampleSensors(void);
-void GetVddVal(void);
-void GetTempVal(void);
-void GetPOTVal(void);
-void GetCapVal(void);
+#define L3G4200_CTRL_REG5 0x24
+#define L3G4200_CTRL_REG5_SET 0x00
+
+#define L3G4200_OUT_TEMP 0x26
+#define L3G4200_CONTINUOUS_READ 0x80
+#define L3G4200_X_L 0x28
+
+#define L3G4200_FIFO_CTRL_REG 0x2E
+#define L3G4200_FIFO_CTRL_REG_SET 0x00
+
+
+#define MMA8451Q_F_SETUP 0x09
+#define MMA8451Q_F_SETUP_SET 0x00
+
+#define MMA8451Q_TRIG_CFG 0x0A
+#define MMA8451Q_TRIG_CFG_SET 0x00
+
+#define MMA8451Q_XYZ_DATA_CFG 0x0E
+#define MMA8451Q_XYZ_DATA_CFG_SET 0x02
+
+#define MMA8451Q_FF_MT_CFG 0x15
+#define MMA8451Q_FF_MT_CFG_SET 0x78
+
+#define MMA8451Q_FF_MT_THS 0x17
+#define MMA8451Q_FF_MT_THS_SET 0x00
+
+#define MMA8451Q_CTRL_REG1 0x2A
+#define MMA8451Q_CTRL_REG1_SET 0x01
+
+#define MMA8451Q_CTRL_REG2 0x2B
+#define MMA8451Q_CTRL_REG2_SET 0x02
+
+#define MMA8451Q_CTRL_REG3 0x2C
+#define MMA8451Q_CTRL_REG3_SET 0x00
+
+#define MMA8451Q_CTRL_REG4 0x2D
+#define MMA8451Q_CTRL_REG4_SET 0x00
+
+#define MMA8451Q_CTRL_REG5 0x2E
+#define MMA8451Q_CTRL_REG5_SET 0x00
+
+#define GYRO_OUT_EN
+#define MAG_OUT_EN
+#define ACC_OUT_EN
+
+void ReadGyro(BYTE *pGyroData);
+void ReadMag(BYTE *pMagData);
+void ReadAcc(BYTE *pAccData);
+
+void configGyro(BYTE subaddr, BYTE value);
+void configAcc(BYTE subaddr, BYTE value);
+
+void SetupGyro(void);
+void SetupMag(void);
+void SetupAcc(void);
 
 
 #endif

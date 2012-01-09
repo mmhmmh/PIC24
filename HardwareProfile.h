@@ -77,8 +77,8 @@
 	#define CE1_LAT     LATBbits.LATB0
     #define CE1_TRIS    TRISBbits.TRISB0
 
-	#define CE2_LAT     LATBbits.LATB1
-    #define CE2_TRIS    TRISBbits.TRISB1
+	#define N24_INT_LAT     LATBbits.LATB1
+    #define N24_INT_TRIS    TRISBbits.TRISB1
 
     //UART
     #define URX_LAT     LATBbits.LATB2

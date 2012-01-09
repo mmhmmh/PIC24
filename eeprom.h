@@ -74,23 +74,7 @@ int I2CWait(void);
 void T2IntOn(void);
 void T2IntOff(void);
 
-void configGyro(BYTE subaddr, BYTE value);
-void configAcc(BYTE subaddr, BYTE value);
 
-void SetupGyro(void);
-void SetupMag(void);
-void SetupAcc(void);
-
-//EEPROM communication functions
-BYTE writePacket(WORD addr, BYTE* packet, BYTE numBytes);
-BYTE readPacket(WORD addr,BYTE *packet, BYTE numBytes);
-BYTE writeWait();
-void StoreAddress(void);
-void GetAddress(void);
-void GetTimestamp(WORD addr);
-void StoreData(WORD addr,WORD data, BYTE type);
-void StoreSensorData(void);
-void TransmitEEPROM(WORD addrMin,WORD addrMax);
 
 
 #endif
