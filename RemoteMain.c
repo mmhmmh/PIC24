@@ -61,7 +61,7 @@
   Section: Includes and Config bits
   ***************************************************************************/
 #include "system.h"
-#ifdef __PIC24F16KA301__
+#ifdef __PIC24F32KA301__
     // Setup configuration bits
     _FBS(BSS_OFF & BWRP_OFF)
     _FGS(GSS0_OFF & GWRP_OFF)
@@ -222,16 +222,14 @@ int main(void)
    	}
 
    	while(1) {
-   		if((nrf24l01_irq_rx_dr_active()))
+   		if((nrf24l01_irq_pin_active() && nrf24l01_irq_rx_dr_active()))
 		{
-			nrf24l01_read_rx_payload(&data, 32); //get the payload into data
-			break;
+			nrf24l01_read_rx_payload(data, 32); //get the payload into data
+			for (j = 0; j<32; j++) {
+				UARTPutHex(data[j]);
+			}
+			nrf24l01_irq_clear_all();
 		}
-
-   		for (j = 0; j<32; j++) {
-   			UARTPutHex(data[j]);
-   		}
-   		nrf24l01_irq_clear_all();
    	}
 
    	while(0) {
@@ -364,42 +362,48 @@ int main(void)
   ***************************************************************************/
 void InitIO(void)
 {
-    LATA = 0;           //all io as output,o
-    LATB = 0;
-    TRISA = 0;
-    TRISB = 0;
+	 LATA = 0;           //all io as output,o
+	    LATB = 0;
+	    TRISA = 0;
+	    TRISB = 0;
 
-    ANSA = 0; //All digital
-    ANSB = 0; //All digital
+	    ANSA = 0; //All digital
+	    ANSB = 0; //All digital
 
-    // 1 is input - 0 is output
+	    // 1 is input - 0 is output
 
-    //I2C Port Configuration
-    SCL_TRIS = 1;       //SCL IH
-    SDA_TRIS = 1;       //SDA IH
+	    //I2C Port Configuration
+	    SCL_TRIS = 1;       //SCL IH
+	    SDA_TRIS = 1;       //SDA IH
 
-    //UART port configuration
-    UTX_LAT = 0;
-    UTX_TRIS = 0;       //U2TX OL
-    URX_TRIS = 1;       //U2RX IH
+	    //UART port configuration
+	    UTX_LAT = 0;
+	    UTX_TRIS = 0;       //U2TX OL
+	    URX_TRIS = 1;       //U2RX IH
 
-	CSN1_LAT = 1;
-	CSN1_TRIS = 0;
 
-	CSN2_LAT = 1;
-    CSN2_TRIS = 0;
+	    //Wireless Transmitter
+		CSN1_LAT = 1;
+		CSN1_TRIS = 0;
 
-	CE1_LAT = 0;
-	CE1_TRIS = 0;
+		CE1_LAT = 0;
+		CE1_TRIS = 0;
 
-	CE2_LAT = 0;
-    CE2_TRIS = 0;
+		N24_INT_TRIS = 1;
 
-    SCK_TRIS = 0;
-    SCK_LAT = 0;
-    SDI_TRIS = 1;
-    SDO_TRIS = 0;
-    SDO_LAT = 0;
+	    SCK_TRIS = 0;
+	    SCK_LAT = 0;
+	    SDI_TRIS = 1;
+	    SDO_TRIS = 0;
+	    SDO_LAT = 0;
+
+		//Sensors INT
+		INT_M_TRIS = 1;
+
+		INT_G_TRIS = 1;
+
+		INT_A_TRIS = 1;
+
 
 }//end InitIO
 

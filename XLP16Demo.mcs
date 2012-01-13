@@ -4,7 +4,7 @@ Version=1.0
 [File000]
 Location=C:\Users\Mark\PIC24\Objects - XLP16Demo\uart.o
 Folder=Intermediary
-DeviceName=PIC24F16KA301
+DeviceName=PIC24F32KA301
 LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 LanguageToolID={069BD372-6CA0-40D4-BF2F-5DC806D05083}
 LanguageToolLocation=C:\Microchip\mplabc30\v3.30\bin\pic30-gcc.exe
@@ -17,7 +17,7 @@ DebugOptions=
 [File001]
 Location=C:\Users\Mark\PIC24\Objects - XLP16Demo\main.o
 Folder=Intermediary
-DeviceName=PIC24F16KA301
+DeviceName=PIC24F32KA301
 LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 LanguageToolID={069BD372-6CA0-40D4-BF2F-5DC806D05083}
 LanguageToolLocation=C:\Microchip\mplabc30\v3.30\bin\pic30-gcc.exe
@@ -30,7 +30,7 @@ DebugOptions=
 [File002]
 Location=C:\Users\Mark\PIC24\Objects - XLP16Demo\eeprom.o
 Folder=Intermediary
-DeviceName=PIC24F16KA301
+DeviceName=PIC24F32KA301
 LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 LanguageToolID={069BD372-6CA0-40D4-BF2F-5DC806D05083}
 LanguageToolLocation=C:\Microchip\mplabc30\v3.30\bin\pic30-gcc.exe
@@ -43,7 +43,7 @@ DebugOptions=
 [File003]
 Location=C:\Users\Mark\PIC24\Objects - XLP16Demo\rtcc.o
 Folder=Intermediary
-DeviceName=PIC24F16KA301
+DeviceName=PIC24F32KA301
 LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 LanguageToolID={069BD372-6CA0-40D4-BF2F-5DC806D05083}
 LanguageToolLocation=C:\Microchip\mplabc30\v3.30\bin\pic30-gcc.exe
@@ -56,7 +56,7 @@ DebugOptions=
 [File004]
 Location=C:\Users\Mark\PIC24\Objects - XLP16Demo\nrf24l01.o
 Folder=Intermediary
-DeviceName=PIC24F16KA301
+DeviceName=PIC24F32KA301
 LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 LanguageToolID={069BD372-6CA0-40D4-BF2F-5DC806D05083}
 LanguageToolLocation=C:\Microchip\mplabc30\v3.30\bin\pic30-gcc.exe
@@ -69,7 +69,7 @@ DebugOptions=
 [File005]
 Location=C:\Users\Mark\PIC24\Objects - XLP16Demo\spi1.o
 Folder=Intermediary
-DeviceName=PIC24F16KA301
+DeviceName=PIC24F32KA301
 LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 LanguageToolID={069BD372-6CA0-40D4-BF2F-5DC806D05083}
 LanguageToolLocation=C:\Microchip\mplabc30\v3.30\bin\pic30-gcc.exe
@@ -82,7 +82,7 @@ DebugOptions=
 [File006]
 Location=C:\Users\Mark\PIC24\Objects - XLP16Demo\sensors.o
 Folder=Intermediary
-DeviceName=PIC24F16KA301
+DeviceName=PIC24F32KA301
 LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 LanguageToolID={069BD372-6CA0-40D4-BF2F-5DC806D05083}
 LanguageToolLocation=C:\Microchip\mplabc30\v3.30\bin\pic30-gcc.exe
@@ -95,7 +95,7 @@ DebugOptions=
 [File007]
 Location=C:\Users\Mark\PIC24\.\Objects - XLP16Demo\XLP16Demo.cof
 Folder=Output
-DeviceName=PIC24F16KA301
+DeviceName=PIC24F32KA301
 LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 LanguageToolID={433C3D55-811D-409D-A6BF-159CF9355B42}
 LanguageToolLocation=C:\Microchip\mplabc30\v3.30\bin\pic30-ld.exe
@@ -108,7 +108,7 @@ DebugOptions=
 [File008]
 Location=C:\Users\Mark\PIC24\.\Objects - XLP16Demo\XLP16Demo.hex
 Folder=Output
-DeviceName=PIC24F16KA301
+DeviceName=PIC24F32KA301
 LanguageToolSuiteID={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 LanguageToolID={433C3D55-811D-409D-A6BF-159CF9355B42}
 LanguageToolLocation=C:\Microchip\mplabc30\v3.30\bin\pic30-ld.exe

@@ -47,7 +47,7 @@
 //#ifdef __PIC24F16KA102__
 //#include "p24F16KA102.h"
 //#elif defined __PIC24F16KA301__
-#include "p24F16KA301.h"
+#include "p24F32KA301.h"
 //#endif
 
 #include "GenericTypeDefs.h"

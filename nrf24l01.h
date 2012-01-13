@@ -41,7 +41,7 @@
 //   SPI include file is.
 //////////////////////////////////////////////////////////////////////////////////
 #include "spi1.h"
-#include "p24F16KA301.h"
+#include "p24F32KA301.h"
 #include "HardwareProfile.h"
 #define spi_send_read_byte(byte)	spi1_send_read_byte(byte)
 

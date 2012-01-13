@@ -48,7 +48,7 @@
 //RA3 -> OSCO
 //RA7 -> PIC24FJ device DISVREG pin
 
-#ifdef __PIC24F16KA301__
+#ifdef __PIC24F32KA301__
 
     #define UARTNUM 1   //use UART1
     #define DSWAKEbits  DSWSRCbits    //workaround for compiler support
@@ -61,24 +61,34 @@
     #define SCL_TRIS    TRISBbits.TRISB8
 
     //SPI
-    #define SCK_LAT     LATBbits.LATB12
-    #define SCK_TRIS    TRISBbits.TRISB12
     #define SDI_LAT     LATBbits.LATB14
     #define SDI_TRIS    TRISBbits.TRISB14
     #define SDO_LAT     LATBbits.LATB13
     #define SDO_TRIS    TRISBbits.TRISB13
+	#define SCK_LAT     LATBbits.LATB12
+    #define SCK_TRIS    TRISBbits.TRISB12
 
 	#define CSN1_LAT     LATAbits.LATA6
     #define CSN1_TRIS    TRISAbits.TRISA6
 
-	#define CSN2_LAT     LATBbits.LATB15
-    #define CSN2_TRIS    TRISBbits.TRISB15
-
 	#define CE1_LAT     LATBbits.LATB0
     #define CE1_TRIS    TRISBbits.TRISB0
 
-	#define N24_INT_LAT     LATBbits.LATB1
-    #define N24_INT_TRIS    TRISBbits.TRISB1
+	//Transmitter INT
+	#define N24_INT_LAT     LATBbits.LATB15
+    #define N24_INT_TRIS    TRISBbits.TRISB15
+
+	//Sensors INT
+	#define INT_M_LAT	LATAbits.LATA2
+	#define INT_M_TRIS	TRISAbits.TRISA2
+
+	#define INT_G_LAT	LATAbits.LATA3
+	#define INT_G_TRIS	TRISAbits.TRISA3
+
+	#define INT_A_LAT	LATBbits.LATB4
+	#define INT_A_TRIS	TRISBbits.TRISB4
+
+
 
     //UART
     #define URX_LAT     LATBbits.LATB2

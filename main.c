@@ -61,12 +61,12 @@
   Section: Includes and Config bits
   ***************************************************************************/
 #include "system.h"
-#ifdef __PIC24F16KA301__
+#ifdef __PIC24F32KA301__
     // Setup configuration bits
     _FBS(BSS_OFF & BWRP_OFF)
     _FGS(GSS0_OFF & GWRP_OFF)
     _FOSCSEL(FNOSC_FRCDIV & IESO_OFF)
-    _FOSC(FCKSM_CSECMD & POSCFREQ_MS & OSCIOFNC_ON & POSCMOD_NONE & SOSCSEL_SOSCLP)
+    _FOSC(FCKSM_CSECMD & POSCFREQ_MS & OSCIOFNC_OFF & POSCMOD_NONE & SOSCSEL_SOSCLP)
     _FWDT(FWDTEN_OFF & WINDIS_OFF & FWPSA_PR128 & WDTPS_PS32768)
     _FPOR(MCLRE_ON & BORV_LPBOR & BOREN_BOR3 & I2C1SEL_PRI & PWRTEN_OFF)
     _FICD(ICS_PGx2)
@@ -140,7 +140,7 @@ int main(void)
 	InitSPI();
 	IdleMs(500);
 
-//	nrf24l01_initialize_debug(false, 32, false);
+	nrf24l01_initialize_debug(false, 32, false);
 
 	IdleMs(500);
 
@@ -225,12 +225,16 @@ int main(void)
 		IdleMs(1000);
    	}
 
-   	while(0) {
+   	while(1) {
+
    		nrf24l01_write_tx_payload(data, 32, true);
    		while(!(nrf24l01_irq_pin_active() && nrf24l01_irq_tx_ds_active()));
-   		nrf24l01_irq_clear_all();
-   		IdleMs(1000);
 		IdleMs(1000);
+		IdleMs(1000);
+
+   		nrf24l01_irq_clear_all();
+		UARTPrintString("Sent a packet");
+
 		IdleMs(1000);
 		IdleMs(1000);
 		IdleMs(1000);
@@ -261,7 +265,7 @@ int main(void)
    	    IdleMs(1000);
    	}
 
-	while(1)
+	while(0)
     {	
 		ReadMag(pData);
 		//********************************************************************************************
@@ -386,11 +390,10 @@ void InitIO(void)
     UTX_TRIS = 0;       //U2TX OL
     URX_TRIS = 1;       //U2RX IH
 
+
+    //Wireless Transmitter
 	CSN1_LAT = 1;
 	CSN1_TRIS = 0;
-
-	CSN2_LAT = 1;
-    CSN2_TRIS = 0;
 
 	CE1_LAT = 0;
 	CE1_TRIS = 0;
@@ -402,6 +405,15 @@ void InitIO(void)
     SDI_TRIS = 1;
     SDO_TRIS = 0;
     SDO_LAT = 0;
+
+	//Sensors INT
+	INT_M_TRIS = 1;
+
+	INT_G_TRIS = 1;
+
+	INT_A_TRIS = 1;
+
+
 
 }//end InitIO
 
