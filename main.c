@@ -65,7 +65,7 @@
     // Setup configuration bits
     _FBS(BSS_OFF & BWRP_OFF)
     _FGS(GSS0_OFF & GWRP_OFF)
-    _FOSCSEL(FNOSC_FRCDIV & IESO_OFF)
+    _FOSCSEL(FNOSC_FRCDIV & IESO_OFF & LPRCSEL_HP & SOSCSRC_DIG)
     _FOSC(FCKSM_CSECMD & POSCFREQ_MS & OSCIOFNC_OFF & POSCMOD_NONE & SOSCSEL_SOSCLP)
     _FWDT(FWDTEN_OFF & WINDIS_OFF & FWPSA_PR128 & WDTPS_PS32768)
     _FPOR(MCLRE_ON & BORV_LPBOR & BOREN_BOR3 & I2C1SEL_PRI & PWRTEN_OFF)
@@ -225,6 +225,18 @@ int main(void)
 		IdleMs(1000);
    	}
 
+
+   	while(0) {
+   		CE2_LAT = 1;
+   		IdleMs(1000);
+   		IdleMs(1000);
+   		IdleMs(1000);
+   		CE2_LAT = 0;
+   		IdleMs(1000);
+   		IdleMs(1000);
+   		IdleMs(1000);
+   	}
+
    	while(1) {
 
    		nrf24l01_write_tx_payload(data, 32, true);
@@ -339,7 +351,6 @@ int main(void)
 
 		IdleMs(100);
 		
-        
     }//end while(1)
 	return 0;
 }//end main
@@ -397,6 +408,9 @@ void InitIO(void)
 
 	CE1_LAT = 0;
 	CE1_TRIS = 0;
+
+	CE2_LAT = 0;
+	CE2_TRIS = 0;
 
 	N24_INT_TRIS = 1;
 

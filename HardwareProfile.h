@@ -74,6 +74,9 @@
 	#define CE1_LAT     LATBbits.LATB0
     #define CE1_TRIS    TRISBbits.TRISB0
 
+	#define CE2_LAT     LATAbits.LATA4
+    #define CE2_TRIS    TRISAbits.TRISA4
+
 	//Transmitter INT
 	#define N24_INT_LAT     LATBbits.LATB15
     #define N24_INT_TRIS    TRISBbits.TRISB15
