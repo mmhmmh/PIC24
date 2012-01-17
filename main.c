@@ -127,7 +127,7 @@ int main(void)
 	BYTE data[32];
 
 	for (j=0; j<32; j++) {
-		data[j] = j;
+		data[j] = 0;
 	}
 
     InitIO();      //configure I/O
@@ -237,21 +237,6 @@ int main(void)
    		IdleMs(1000);
    	}
 
-   	while(1) {
-
-   		nrf24l01_write_tx_payload(data, 32, true);
-   		while(!(nrf24l01_irq_pin_active() && nrf24l01_irq_tx_ds_active()));
-		IdleMs(1000);
-		IdleMs(1000);
-
-   		nrf24l01_irq_clear_all();
-		UARTPrintString("Sent a packet");
-
-		IdleMs(1000);
-		IdleMs(1000);
-		IdleMs(1000);
-
-   	}
 
    	while(0) {
    		BYTE registerData[40];
@@ -276,6 +261,29 @@ int main(void)
    	    IdleMs(1000);
    	    IdleMs(1000);
    	}
+
+
+   	while(1) {
+
+		ReadAcc(data);
+   		ReadMag(data+6);
+		ReadGyro(data+12);
+
+   		nrf24l01_write_tx_payload(data, 32, true);
+   		while(!(nrf24l01_irq_pin_active() && nrf24l01_irq_tx_ds_active()));
+   		nrf24l01_irq_clear_all();
+   		IdleMs(2);
+//   		for (j = 0; j<32;j++) {
+//   			if (data[j] != 0xff) {
+//   				data[j] += 1;
+//   				break;
+//   			} else {
+//   				data[j] = 0;
+//   			}
+//   		}
+
+   	}
+
 
 	while(0)
     {	

@@ -228,6 +228,7 @@ int main(void)
 			for (j = 0; j<32; j++) {
 				UARTPutHex(data[j]);
 			}
+			UARTPrintString("\r\n");
 			nrf24l01_irq_clear_all();
 		}
    	}
