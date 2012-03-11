@@ -90,6 +90,8 @@
 #endif
    
 
+#define PIPE_NUM 1
+#define DATA_LEN 19
 
 /****************************************************************************
   Section: Global Variables
@@ -140,9 +142,61 @@ int main(void)
 	InitSPI();
 	IdleMs(500);
 
-	nrf24l01_initialize_debug(false, 32, false);
+	nrf24l01_initialize(nrf24l01_CONFIG_DEFAULT_VAL | nrf24l01_CONFIG_PWR_UP, //1 byte CRC, powered up, RX
+						   true,								//enable CE
+						   nrf24l01_EN_AA_ENAA_ALL, 			//disable auto-ack on all pipes
+						   nrf24l01_EN_RXADDR_ERX_ALL, 			//enable receive on all pipes
+						   nrf24l01_SETUP_AW_5BYTES, 		//5-byte addressing
+						   nrf24l01_SETUP_RETR_DEFAULT_VAL, 	//not using auto-ack, so use default
+						   nrf24l01_RF_CH_DEFAULT_VAL, 			//RF channel 3
+						   nrf24l01_RF_SETUP_DEFAULT_VAL,  		//2 Mbps, 0 dBm
+						   NULL, 								//default receive addresses on all 6 pipes
+						   NULL, 								//""
+						   nrf24l01_RX_ADDR_P2_DEFAULT_VAL, 	//""
+						   nrf24l01_RX_ADDR_P3_DEFAULT_VAL, 	//""
+						   nrf24l01_RX_ADDR_P4_DEFAULT_VAL, 	//""
+						   nrf24l01_RX_ADDR_P5_DEFAULT_VAL, 	//""
+						   NULL, 								//default TX address
+						   DATA_LEN, 									//1 byte paylaod width on all 6 pipes
+						   DATA_LEN, 									//""
+						   DATA_LEN, 									//""
+						   DATA_LEN,  									//""
+						   DATA_LEN,  									//""
+						   DATA_LEN); 									//""
+
+	//nrf24l01_initialize_debug(false, DATA_LEN, true);
 
 	IdleMs(500);
+
+	unsigned char tx_addr[5]; //temporary variable to hold TX address for current pipe
+
+	switch(PIPE_NUM)
+	{
+		case 0: //setup TX address as default RX address for pipe 0 (E7:E7:E7:E7:E7)
+			tx_addr[0] = tx_addr[1] = tx_addr[2] = tx_addr[3] = tx_addr[4] = nrf24l01_RX_ADDR_P0_B0_DEFAULT_VAL;
+			nrf24l01_set_tx_addr(tx_addr, 5);
+			break;
+		case 1: //setup TX address as default RX address for pipe 1 (C2:C2:C2:C2:C2)
+			tx_addr[0] = tx_addr[1] = tx_addr[2] = tx_addr[3] = tx_addr[4] = nrf24l01_RX_ADDR_P1_B0_DEFAULT_VAL;
+			nrf24l01_set_tx_addr(tx_addr, 5);
+			break;
+		case 2: //setup TX address as default RX address for pipe 2 (C2:C2:C2:C2:C3)
+			tx_addr[0] = nrf24l01_RX_ADDR_P2_DEFAULT_VAL;
+			nrf24l01_set_tx_addr(tx_addr, 1);
+			break;
+		case 3: //setup TX address as default RX address for pipe 3 (C2:C2:C2:C2:C4)
+			tx_addr[0] = nrf24l01_RX_ADDR_P3_DEFAULT_VAL;
+			nrf24l01_set_tx_addr(tx_addr, 1);
+			break;
+		case 4: //setup TX address as default RX address for pipe 4 (C2:C2:C2:C2:C5)
+			tx_addr[0] = nrf24l01_RX_ADDR_P4_DEFAULT_VAL;
+			nrf24l01_set_tx_addr(tx_addr, 1);
+			break;
+		case 5: //setup TX address as default RX address for pipe 5 (C2:C2:C2:C2:C6)
+			tx_addr[0] = nrf24l01_RX_ADDR_P5_DEFAULT_VAL;
+			nrf24l01_set_tx_addr(tx_addr, 1);
+			break;
+	}
 
 
 	SetupGyro();
@@ -227,11 +281,11 @@ int main(void)
 
 
    	while(0) {
-   		CE2_LAT = 1;
+   		//CE2_LAT = 1;
    		IdleMs(1000);
    		IdleMs(1000);
    		IdleMs(1000);
-   		CE2_LAT = 0;
+   		//CE2_LAT = 0;
    		IdleMs(1000);
    		IdleMs(1000);
    		IdleMs(1000);
@@ -265,14 +319,19 @@ int main(void)
 
    	while(1) {
 
-		ReadAcc(data);
-   		ReadMag(data+6);
-		ReadGyro(data+12);
+   		data[0] = PIPE_NUM;
 
-   		nrf24l01_write_tx_payload(data, 32, true);
-   		while(!(nrf24l01_irq_pin_active() && nrf24l01_irq_tx_ds_active()));
+		ReadAcc(data+1);
+   		ReadMag(data+7);
+		ReadGyro(data+13);
+
+   		nrf24l01_write_tx_payload(data, DATA_LEN, true);
+   		while(!(nrf24l01_irq_pin_active() && (nrf24l01_irq_tx_ds_active() || nrf24l01_irq_max_rt_active())));
+   		if (nrf24l01_irq_max_rt_active()) {
+   	   		nrf24l01_flush_tx();
+   		}
    		nrf24l01_irq_clear_all();
-   		IdleMs(2);
+   		IdleMs(10);
 //   		for (j = 0; j<32;j++) {
 //   			if (data[j] != 0xff) {
 //   				data[j] += 1;
@@ -417,8 +476,8 @@ void InitIO(void)
 	CE1_LAT = 0;
 	CE1_TRIS = 0;
 
-	CE2_LAT = 0;
-	CE2_TRIS = 0;
+	//CE2_LAT = 0;
+	//CE2_TRIS = 0;
 
 	N24_INT_TRIS = 1;
 

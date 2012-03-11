@@ -89,7 +89,7 @@
     _CONFIG4(DSWDTEN_OFF & RTCOSC_SOSC & DSWDTPS_DSWDTPS6 & DSWDTOSC_LPRC & DSBOREN_OFF)
 #endif
 
-
+#define DATA_LEN 19
 
 /****************************************************************************
   Section: Global Variables
@@ -136,9 +136,32 @@ int main(void)
 	InitSPI();
 	IdleMs(500);
 
-	nrf24l01_initialize_debug(true, 32, false);
+	nrf24l01_initialize(nrf24l01_CONFIG_DEFAULT_VAL | nrf24l01_CONFIG_PWR_UP | nrf24l01_CONFIG_PRIM_RX, //1 byte CRC, powered up, RX
+							   true,								//enable CE
+							   nrf24l01_EN_AA_ENAA_ALL, 			//disable auto-ack on all pipes
+							   nrf24l01_EN_RXADDR_ERX_ALL, 			//enable receive on all pipes
+							   nrf24l01_SETUP_AW_5BYTES, 		//5-byte addressing
+							   nrf24l01_SETUP_RETR_DEFAULT_VAL, 	//not using auto-ack, so use default
+							   nrf24l01_RF_CH_DEFAULT_VAL, 			//RF channel 3
+							   nrf24l01_RF_SETUP_DEFAULT_VAL,  		//2 Mbps, 0 dBm
+							   NULL, 								//default receive addresses on all 6 pipes
+							   NULL, 								//""
+							   nrf24l01_RX_ADDR_P2_DEFAULT_VAL, 	//""
+							   nrf24l01_RX_ADDR_P3_DEFAULT_VAL, 	//""
+							   nrf24l01_RX_ADDR_P4_DEFAULT_VAL, 	//""
+							   nrf24l01_RX_ADDR_P5_DEFAULT_VAL, 	//""
+							   NULL, 								//default TX address
+							   DATA_LEN, 									//1 byte paylaod width on all 6 pipes
+							   DATA_LEN, 									//""
+							   DATA_LEN, 									//""
+							   DATA_LEN,  									//""
+							   DATA_LEN,  									//""
+							   DATA_LEN);
+
+	//nrf24l01_initialize_debug(true, DATA_LEN, true);
 
 	IdleMs(500);
+
 
 
 	//SetupGyro();
@@ -222,15 +245,15 @@ int main(void)
    	}
 
    	while(1) {
-   		if((nrf24l01_irq_pin_active() && nrf24l01_irq_rx_dr_active()))
-		{
-			nrf24l01_read_rx_payload(data, 32); //get the payload into data
-			for (j = 0; j<32; j++) {
-				UARTPutHex(data[j]);
-			}
-			UARTPrintString("\r\n");
-			nrf24l01_irq_clear_all();
+        while(!(nrf24l01_irq_pin_active() && nrf24l01_irq_rx_dr_active()));
+
+		nrf24l01_read_rx_payload(data, DATA_LEN); //get the payload into data
+		nrf24l01_irq_clear_all();
+
+		for (j = 0; j<DATA_LEN; j++) {
+			UARTPutHex(data[j]);
 		}
+		UARTPrintString("\r\n");
    	}
 
    	while(0) {

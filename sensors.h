@@ -47,8 +47,8 @@
 #include "system.h"
 
 #define MAG_ADDRESS      0x3C
-#define GYRO_ADDRESS      0xD0
-#define ACC_ADDRESS      0x38
+#define GYRO_ADDRESS      0xD2
+#define ACC_ADDRESS      0x3A
 
 #define I2C_WRITE           0x00
 #define I2C_READ            0x01
